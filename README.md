@@ -4,9 +4,11 @@ A Visual Console inspired by VConsole.
 
 ## Features
 
+- __configurable__: It's a [`Logger`](https://github.com/leisim/logger) Plugin.
+- __simple__: two channel output, IDE's console and screen visual-console.
 - __tiny__: It has a small size.
 - __quickly__: It works smooth.
-- __powerful__: Filter、Search、StackTrace、Clear logs、Delete specific huge log by double-click...
+- __powerful__: Filter、Search, StackTrace, Clean, Copy, Delete some log by double-click and etc.
 
 ## Getting started
 
@@ -66,6 +68,10 @@ logger.w("warning");
 logger.e("error");
 logger.wtf("wtf");
 ```
+
+## Screen Shot
+
+![截图](https://github.com/oloshe/visual_console/blob/main/img/Simulator%20Screen%20Shot%20-%20iPhone%2013.png?raw=true)
 
 ## Additional information
 
