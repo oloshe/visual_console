@@ -549,7 +549,14 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
               initialEntries: [
                 OverlayEntry(builder: (_) {
                   return ListTile(
-                    leading: const Icon(Icons.search),
+                    leading: IconButton(
+                      onPressed: () {
+                        var val = textEditController.text;
+                        ConsoleMgr.instance
+                            .logsFilter(val == "" ? null : val, true);
+                      },
+                      icon: const Icon(Icons.search),
+                    ),
                     title: TextField(
                       controller: textEditController,
                       onSubmitted: (val) {
