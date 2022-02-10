@@ -1,6 +1,8 @@
 # Visual Console
 
-A Visual Console inspired by VConsole.
+A visual console inspired by VConsole.
+
+Base on [`BotToast`](https://github.com/MMMzq/bot_toast) to create a popup widget.
 
 ## Features
 
@@ -42,11 +44,7 @@ var logger = VisualLogger(
 ``` dart
 MaterialApp(
   title: 'Visual Console Demo',
-  home: Builder(
-    builder: (context) {
-      return const MyHomePage();
-    },
-  ),
+  home: const MyHomePage(),
   navigatorObservers: [BotToastNavigatorObserver()],
   builder: BotToastInit(),
 );

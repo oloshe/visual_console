@@ -1,6 +1,6 @@
 name: visual_console
 description: a visual console inspired by vconsole.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/oloshe/visual_console
 
 environment:

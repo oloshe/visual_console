@@ -289,11 +289,14 @@ class _ConsoleState extends State<_Console> {
                               Expanded(
                                 child: TextButton(
                                   onPressed: () {
-                                    setState(() {
-                                      showPanel = false;
-                                    });
+                                    BotToast.removeAll("console");
+                                    // ignore: avoid_print
+                                    print(
+                                        "visual console closed! hot-restart to show it again!");
+
+                                    showSnack("See U Again!");
                                   },
-                                  child: const Text("Hide"),
+                                  child: const Text("Close"),
                                 ),
                               )
                             ],
@@ -526,12 +529,7 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    BotToast.removeAll("console");
-                    // ignore: avoid_print
-                    print(
-                        "visual console closed! hot-restart to show it again!");
-
-                    showSnack("See U Again!");
+                    widget.onClose.call();
                   },
                   child: const Icon(
                     Icons.close,

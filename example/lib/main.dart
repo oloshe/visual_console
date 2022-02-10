@@ -15,7 +15,9 @@ var logger = VisualLogger(
         try {
           // 获取控制台一行能打印多少字符
           lineLength = io.stdout.terminalColumns;
-        } catch (e) {}
+        } catch (e) {
+          // ignore: empty_catches
+        }
         return lineLength;
       }(),
       colors: io.stdout.supportsAnsiEscapes, // Colorful log messages
