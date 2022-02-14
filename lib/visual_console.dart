@@ -9,9 +9,7 @@ export 'package:visual_console/src/logger.dart';
 
 
 class VisualConsole {
-  static init([bool show = true]) {
-    if (show) {
-      ConsoleMgr.showConsole();
-    }
+  static init([ConsoleConfiguration? config]) {
+    ConsoleMgr.showConsole(config ?? ConsoleConfiguration());
   }
 }

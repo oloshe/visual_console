@@ -107,7 +107,10 @@ class ConsoleMgr with ChangeNotifier {
     notifyListeners();
   }
 
-  static void showConsole() {
+  static late ConsoleConfiguration config;
+
+  static void showConsole(ConsoleConfiguration cfg) {
+    config = cfg;
     BotToast.showWidget(
       toastBuilder: (_) => Builder(
         builder: (context) {
@@ -135,6 +138,28 @@ class ConsoleMgr with ChangeNotifier {
     Level.error: Colors.white,
     Level.wtf: Colors.white,
   };
+}
+
+class ConsoleConfiguration {
+  /// 控制台主体占屏幕高度比例，默认是 0.9
+  final double heightRatio;
+  /// log 的文字大小
+  final double logFontSize;
+  /// 错误的文字大小
+  final double errorFontSize;
+  /// 调用栈的文字大小
+  final double traceFontSize;
+  ConsoleConfiguration({
+    double? heightRatio,
+    double? logFontSize,
+    double? errorFontSize,
+    double? traceFontSize,
+  }): heightRatio = heightRatio ?? 0.9,
+      logFontSize = logFontSize ?? 13,
+      errorFontSize = errorFontSize ?? 15,
+      traceFontSize = traceFontSize ?? 10,
+      assert(heightRatio == null || (heightRatio >= 0.4 && heightRatio <= 1),
+        "heightRatio must in [0.4, 1] or null");
 }
 
 /// 控制台
@@ -237,7 +262,7 @@ class _ConsoleState extends State<_Console> {
           if (showPanel)
             Positioned(
               bottom: 0,
-              top: widget.size.height * 0.2,
+              top: widget.size.height * (1 - ConsoleMgr.config.heightRatio),
               left: 0,
               right: 0,
               child: DefaultTextStyle(
@@ -278,7 +303,7 @@ class _ConsoleState extends State<_Console> {
                                 ),
                               ),
                               const SizedBox(
-                                height: 50,
+                                height: 40,
                                 child: VerticalDivider(
                                   width: 10,
                                   color: Colors.grey,
@@ -296,7 +321,7 @@ class _ConsoleState extends State<_Console> {
 
                                     showSnack("See U Again!");
                                   },
-                                  child: const Text("Close"),
+                                  child: const Text("Dispose"),
                                 ),
                               )
                             ],
@@ -439,12 +464,14 @@ class _LogItemState extends State<_LogItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.event.log),
+        Text(widget.event.log, style: TextStyle(
+          fontSize: ConsoleMgr.config.logFontSize,
+        )),
         if (widget.event.errorName != null)
           Text(
             widget.event.errorName!,
             style: TextStyle(
-                fontSize: 15,
+                fontSize: ConsoleMgr.config.errorFontSize,
                 color: ConsoleMgr.levelTextColors[widget.event.level]!,
                 height: 2),
           ),
@@ -452,7 +479,7 @@ class _LogItemState extends State<_LogItem> {
           Text(
             widget.event.errorStack!,
             style: TextStyle(
-                fontSize: 12,
+                fontSize: ConsoleMgr.config.traceFontSize,
                 color: ConsoleMgr.levelTextColors[widget.event.level]!,
                 height: 2),
           ),

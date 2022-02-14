@@ -1,3 +1,7 @@
+## 0.2.0
+
+1. console configurable.
+
 ## 0.1.1
 
 1. add example
