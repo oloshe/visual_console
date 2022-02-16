@@ -1,15 +1,15 @@
 library visual_console;
 
+import 'package:flutter/material.dart';
 import 'package:visual_console/src/console.dart';
 
-export 'package:bot_toast/bot_toast.dart';
 export 'package:logger/logger.dart';
 export 'package:visual_console/src/console.dart';
 export 'package:visual_console/src/logger.dart';
 
-
 class VisualConsole {
-  static init([ConsoleConfiguration? config]) {
-    ConsoleMgr.showConsole(config ?? ConsoleConfiguration());
+  static TransitionBuilder init([ConsoleConfiguration? config]) {
+    ConsoleMgr.config = config ?? ConsoleConfiguration();
+    return (context, Widget? child) => Console(size: MediaQuery.of(context).size);
   }
 }

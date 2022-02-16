@@ -22,7 +22,7 @@ var logger = VisualLogger(
       }(),
       colors: io.stdout.supportsAnsiEscapes, // Colorful log messages
       printEmojis: false, // 打印表情符号
-      printTime: false, // 打印时间
+      printTime: true, // 打印时间
     ),
   ),
 );
@@ -45,26 +45,13 @@ class MyApp extends StatelessWidget {
           return const MyHomePage();
         },
       ),
-      navigatorObservers: [BotToastNavigatorObserver()],
-      builder: BotToastInit(),
+      builder: VisualConsole.init(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    super.initState();
-    VisualConsole.init();
-    logger.i("welcome to visual console");
-  }
 
   @override
   Widget build(BuildContext context) {

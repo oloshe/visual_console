@@ -1,3 +1,9 @@
+## 0.3.0
+
+1. remove dependency "BotToast"
+2. add time print support in visual console.
+3. change the init step.
+
 ## 0.2.0
 
 1. console configurable.

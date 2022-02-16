@@ -2,14 +2,12 @@
 
 A visual console inspired by VConsole.
 
-Base on [`BotToast`](https://github.com/MMMzq/bot_toast) to create a popup widget.
-
 ## Features
 
 - __configurable__: It's a [`Logger`](https://github.com/leisim/logger) Plugin.
 - __simple__: two channel output, IDE's console and screen visual-console.
 - __tiny__: It has a small size.
-- __quickly__: It works smooth.
+- __blazing__: It works fast and smooth.
 - __powerful__: Filter、Search, StackTrace, Clean, Copy, Delete some log by double-click and etc.
 
 ## Getting started
@@ -33,27 +31,20 @@ var logger = VisualLogger(
       }(),
       colors: io.stdout.supportsAnsiEscapes, // Colorful log messages
       printEmojis: false, // 打印表情符号
-      printTime: false, // 打印时间
+      printTime: true, // 打印时间
     ),
   ),
 );
 ```
 
-### 2. Init `BotToast`
+### 2. Init
 
 ``` dart
 MaterialApp(
   title: 'Visual Console Demo',
   home: const MyHomePage(),
-  navigatorObservers: [BotToastNavigatorObserver()],
-  builder: BotToastInit(),
+  builder: VisualConsole.init(),
 );
-```
-
-### 3. Init `VisualConsole`
-
-``` dart
-VisualConsole.init();
 ```
 
 ## Usage
@@ -71,6 +62,14 @@ logger.wtf("wtf");
 
 ![截图](https://github.com/oloshe/visual_console/blob/main/img/Simulator%20Screen%20Shot%20-%20iPhone%2013.png?raw=true)
 
+
+## Breaking Change
+
+### 0.2.0 -> 0.3.0
+
+1. remove dependency "BotToast"
+2. change the init step.
+
 ## Additional information
 
-this package is a plugin of [`Logger`](https://github.com/leisim/logger) and it depends on [`BotToast`](https://github.com/MMMzq/bot_toast) package;
+this package is a plugin of [`Logger`](https://github.com/leisim/logger);

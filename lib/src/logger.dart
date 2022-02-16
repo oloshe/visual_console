@@ -49,8 +49,10 @@ class VisualOutputEvent {
   final String log;
   final String? errorName;
   final String? errorStack;
+  final String? time;
 
-  VisualOutputEvent(this.level, this.log, {this.errorName, this.errorStack});
+  VisualOutputEvent(this.level, this.log,
+      {this.errorName, this.errorStack, this.time});
 }
 
 class VisualOutput extends ConsoleOutput {
@@ -91,8 +93,20 @@ class VisualPrinter extends PrefixPrinter {
       stackTraceStr = _realPrinter.formatStackTrace(
           event.stackTrace, _realPrinter.errorMethodCount);
     }
-    return VisualOutputEvent(event.level, logs,
-        errorName: errorName, errorStack: stackTraceStr);
+    String? time;
+    if (_realPrinter.printTime) {
+      var now = DateTime.now();
+      time = "${_numPrefix(now.hour)}"
+          ":${_numPrefix(now.minute)}"
+          ":${_numPrefix(now.second)}";
+    }
+    return VisualOutputEvent(
+      event.level,
+      logs,
+      errorName: errorName,
+      errorStack: stackTraceStr,
+      time: time,
+    );
   }
 }
 
@@ -155,3 +169,6 @@ class VisualPrefixPrinter extends PrettyPrinter {
         || str.startsWith('package:visual_console');
   }
 }
+
+String _numPrefix(int num) => "${num < 10 ? '0' : ''}$num";
+

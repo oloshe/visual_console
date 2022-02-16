@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -109,18 +108,6 @@ class ConsoleMgr with ChangeNotifier {
 
   static late ConsoleConfiguration config;
 
-  static void showConsole(ConsoleConfiguration cfg) {
-    config = cfg;
-    BotToast.showWidget(
-      toastBuilder: (_) => Builder(
-        builder: (context) {
-          return _Console(size: MediaQuery.of(context).size);
-        }
-      ),
-      groupKey: "console",
-    );
-  }
-
   static const levelColors = {
     Level.verbose: Color(0xffb1b1f8),
     Level.debug: Color(0xfff1f1f1),
@@ -163,10 +150,10 @@ class ConsoleConfiguration {
 }
 
 /// 控制台
-class _Console extends StatefulWidget {
+class Console extends StatefulWidget {
   final Size size;
 
-  const _Console({
+  const Console({
     Key? key,
     required this.size,
   }) : super(key: key);
@@ -175,7 +162,7 @@ class _Console extends StatefulWidget {
   _ConsoleState createState() => _ConsoleState();
 }
 
-class _ConsoleState extends State<_Console> {
+class _ConsoleState extends State<Console> {
   bool dragging = false;
   late Offset pos;
   final GlobalKey _entry = GlobalKey();
@@ -314,12 +301,9 @@ class _ConsoleState extends State<_Console> {
                               Expanded(
                                 child: TextButton(
                                   onPressed: () {
-                                    BotToast.removeAll("console");
-                                    // ignore: avoid_print
-                                    print(
-                                        "visual console closed! hot-restart to show it again!");
-
-                                    showSnack("See U Again!");
+                                    setState(() {
+                                      showPanel = false;
+                                    });
                                   },
                                   child: const Text("Dispose"),
                                 ),
@@ -416,11 +400,11 @@ class _LogListItem extends StatelessWidget {
             text: event.log,
           ),
         );
-        showSnack("Copied!");
+        // showSnack("Copied!");
       },
       onDoubleTap: () {
         ConsoleMgr.instance.deleteLog(event);
-        showSnack("Deleted!");
+        // showSnack("Deleted!");
       },
       child: ColoredBox(
         color: ConsoleMgr.levelColors[event.level]!,
@@ -464,6 +448,11 @@ class _LogItemState extends State<_LogItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.event.time != null)
+          Text(
+            widget.event.time!,
+            style: const TextStyle(fontSize: 10),
+          ),
         Text(widget.event.log, style: TextStyle(
           fontSize: ConsoleMgr.config.logFontSize,
         )),
@@ -604,12 +593,4 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
       ],
     );
   }
-}
-
-void showSnack(String title) {
-  BotToast.showSimpleNotification(
-    title: title,
-    align: const Alignment(0, -0.99),
-    dismissDirections: const [DismissDirection.up],
-  );
 }
