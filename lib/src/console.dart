@@ -136,15 +136,31 @@ class ConsoleConfiguration {
   final double errorFontSize;
   /// 调用栈的文字大小
   final double traceFontSize;
+  /// 每一行的 padding
+  final EdgeInsets linePadding;
+  /// 初始化的位置
+  final Offset? initialPosition;
+
+  final double footerHeight;
+
+  final Color headerColor;
+
   ConsoleConfiguration({
+    this.initialPosition,
     double? heightRatio,
     double? logFontSize,
     double? errorFontSize,
     double? traceFontSize,
+    EdgeInsets? linePadding,
+    double? footerHeight,
+    Color? headerColor,
   }): heightRatio = heightRatio ?? 0.9,
       logFontSize = logFontSize ?? 13,
       errorFontSize = errorFontSize ?? 15,
       traceFontSize = traceFontSize ?? 10,
+      linePadding = const EdgeInsets.fromLTRB(15, 10, 15, 10),
+      footerHeight = footerHeight ?? 50,
+      headerColor = headerColor ?? Colors.green,
       assert(heightRatio == null || (heightRatio >= 0.4 && heightRatio <= 1),
         "heightRatio must in [0.4, 1] or null");
 }
@@ -173,9 +189,9 @@ class _ConsoleState extends State<Console> {
   @override
   void initState() {
     super.initState();
-    pos = Offset(
-      20,
-      widget.size.height - 100
+    pos = ConsoleMgr.config.initialPosition ?? Offset(
+        20,
+        widget.size.height - 100
     );
   }
 
@@ -276,7 +292,7 @@ class _ConsoleState extends State<Console> {
                           }),
                       const _ConsoleBody(),
                       SizedBox(
-                        height: 50,
+                        height: ConsoleMgr.config.footerHeight,
                         child: ColoredBox(
                           color: const Color(0xfff6f6f6),
                           child: Row(
@@ -415,7 +431,7 @@ class _LogListItem extends StatelessWidget {
               height: 0.5,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+              padding: ConsoleMgr.config.linePadding,
               child: DefaultTextStyle.merge(
                 style: TextStyle(
                   color: ConsoleMgr.levelTextColors[event.level]!,
@@ -513,7 +529,7 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
         SizedBox(
           height: 50,
           child: ColoredBox(
-            color: Colors.green,
+            color: ConsoleMgr.config.headerColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
