@@ -47,6 +47,30 @@ MaterialApp(
 );
 ```
 
+### 3. (*) If Use With BotToast
+
+You can choose which layer should cover other one.
+
+```dart
+var botToastBuilder = BotToastInit();
+MaterialApp(
+  title: 'Visual Console Demo',
+  home: const MyHomePage(),
+  builder: (context, child) {
+  child = botToastBuilder(context, child);
+  return Stack(
+    children: [
+      VisualConsole.init(
+        ConsoleConfiguration(
+            // ... configure you own
+        )
+      )(context, child),
+    ],
+  );
+ },
+);
+```
+
 ## Usage
 
 ```dart
@@ -61,14 +85,6 @@ logger.wtf("wtf");
 ## Screen Shot
 
 ![截图](https://github.com/oloshe/visual_console/blob/main/img/Simulator%20Screen%20Shot%20-%20iPhone%2013.png?raw=true)
-
-
-## Breaking Change
-
-### 0.2.0 -> 0.3.0
-
-1. remove dependency "BotToast"
-2. change the init step.
 
 ## Additional information
 
