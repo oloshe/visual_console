@@ -197,70 +197,68 @@ class _ConsoleState extends State<Console> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.size.height,
-      width: widget.size.width,
-      child: Stack(
-        children: [
-          Positioned(
-            key: _entry,
-            left: pos.dx,
-            top: pos.dy,
-            child: GestureDetector(
-              onVerticalDragCancel: () {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          key: _entry,
+          left: pos.dx,
+          top: pos.dy,
+          child: GestureDetector(
+            onVerticalDragCancel: () {
+              setState(() {
+                dragging = false;
+              });
+            },
+            onVerticalDragUpdate: (detail) {
+              final RenderBox box =
+                  _entry.currentContext?.findRenderObject() as RenderBox;
+              final size = box.size;
+              var newPos = detail.globalPosition
+                  .translate(-size.width / 2, -size.height / 2);
+              setState(() {
+                pos = newPos;
+              });
+            },
+            onVerticalDragStart: (detail) {
+              setState(() {
+                dragging = true;
+              });
+            },
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+              ),
+              onPressed: () {
                 setState(() {
-                  dragging = false;
+                  showPanel = true;
                 });
-              },
-              onVerticalDragUpdate: (detail) {
-                final RenderBox box =
-                    _entry.currentContext?.findRenderObject() as RenderBox;
-                final size = box.size;
-                var newPos = detail.globalPosition
-                    .translate(-size.width / 2, -size.height / 2);
-                setState(() {
-                  pos = newPos;
-                });
-              },
-              onVerticalDragStart: (detail) {
-                setState(() {
-                  dragging = true;
-                });
-              },
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.green),
-                ),
-                onPressed: () {
-                  setState(() {
-                    showPanel = true;
-                  });
 
-                  /// 每次打开重置一下
-                  ConsoleMgr.instance.logsFilter(null);
-                },
-                child: const Text("Console"),
+                /// 每次打开重置一下
+                ConsoleMgr.instance.logsFilter(null);
+              },
+              child: const Text("Console"),
+            ),
+          ),
+        ),
+        // 蒙层
+        if (showPanel)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  showPanel = false;
+                });
+              },
+              child: const ColoredBox(
+                color: Colors.black38,
               ),
             ),
           ),
-          // 蒙层
-          if (showPanel)
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    showPanel = false;
-                  });
-                },
-                child: const ColoredBox(
-                  color: Colors.black38,
-                ),
-              ),
-            ),
           // console面板
           if (showPanel)
             Positioned(
@@ -273,68 +271,67 @@ class _ConsoleState extends State<Console> {
                   fontSize: 26,
                   color: Colors.black,
                 ),
-                child: Material(
-                  child: Column(
-                    children: [
-                      _ConsoleHeader(
-                          tabItems: _tabItems,
-                          onTabChange: (index) {
-                            String? condition;
-                            if (_tabItems[index] != "All") {
-                              condition = _tabItems[index];
-                            }
-                            ConsoleMgr.instance.logsFilter(condition);
-                          },
-                          onClose: () {
-                            setState(() {
-                              showPanel = false;
-                            });
-                          }),
-                      const _ConsoleBody(),
-                      SizedBox(
-                        height: ConsoleMgr.config.footerHeight,
-                        child: ColoredBox(
-                          color: const Color(0xfff6f6f6),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextButton(
-                                  onPressed: () {
-                                    ConsoleMgr.instance.clearLog();
-                                  },
-                                  child: const Text("Clear"),
-                                ),
+              child: Material(
+                child: Column(
+                  children: [
+                    _ConsoleHeader(
+                        tabItems: _tabItems,
+                        onTabChange: (index) {
+                          String? condition;
+                          if (_tabItems[index] != "All") {
+                            condition = _tabItems[index];
+                          }
+                          ConsoleMgr.instance.logsFilter(condition);
+                        },
+                        onClose: () {
+                          setState(() {
+                            showPanel = false;
+                          });
+                        }),
+                    const _ConsoleBody(),
+                    SizedBox(
+                      height: 50,
+                      child: ColoredBox(
+                        color: const Color(0xfff6f6f6),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () {
+                                  ConsoleMgr.instance.clearLog();
+                                },
+                                child: const Text("Clear"),
                               ),
-                              const SizedBox(
-                                height: 40,
-                                child: VerticalDivider(
-                                  width: 10,
-                                  color: Colors.grey,
-                                  indent: 5,
-                                  endIndent: 5,
-                                ),
+                            ),
+                            const SizedBox(
+                              height: 40,
+                              child: VerticalDivider(
+                                width: 10,
+                                color: Colors.grey,
+                                indent: 5,
+                                endIndent: 5,
                               ),
-                              Expanded(
-                                child: TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      showPanel = false;
-                                    });
-                                  },
-                                  child: const Text("Dispose"),
-                                ),
-                              )
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    showPanel = false;
+                                  });
+                                },
+                                child: const Text("Dispose"),
+                              ),
+                            )
+                          ],
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                    )
+                  ],
                 ),
               ),
-            )
-        ],
-      ),
+            ),
+          ),
+      ],
     );
   }
 }

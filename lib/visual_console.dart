@@ -10,6 +10,11 @@ export 'package:visual_console/src/logger.dart';
 class VisualConsole {
   static TransitionBuilder init([ConsoleConfiguration? config]) {
     ConsoleMgr.config = config ?? ConsoleConfiguration();
-    return (context, Widget? child) => Console(size: MediaQuery.of(context).size);
+    return (context, Widget? child) => Stack(
+      children: [
+        if (child != null) child,
+        Console(size: MediaQuery.of(context).size)
+      ],
+    );
   }
 }
