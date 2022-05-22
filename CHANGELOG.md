@@ -1,3 +1,9 @@
+## 0.4.0
+
+1. fix error
+2. add selectable text
+3. add snack bar tips
+
 ## 0.3.0+1
 
 1. fix init step error

@@ -1,12 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
-import 'package:tuple/tuple.dart';
 
-import 'package:visual_console/src/logger.dart';
+import 'package:visual_console/visual_console.dart';
 
 class ConsoleMgr with ChangeNotifier {
   static Duration debounceDuration = const Duration(seconds: 1);
@@ -106,7 +102,7 @@ class ConsoleMgr with ChangeNotifier {
     notifyListeners();
   }
 
-  static late ConsoleConfiguration config;
+  static ConsoleConfiguration config = ConsoleConfiguration();
 
   static const levelColors = {
     Level.verbose: Color(0xffb1b1f8),
@@ -128,34 +124,29 @@ class ConsoleMgr with ChangeNotifier {
 }
 
 class ConsoleConfiguration {
-  /// 控制台主体占屏幕高度比例，默认是 0.9
-  final double heightRatio;
   /// log 的文字大小
-  final double logFontSize;
+  final TextStyle? logStyle;
+
   /// 错误的文字大小
-  final double errorFontSize;
+  final TextStyle? errorStyle;
+
   /// 调用栈的文字大小
-  final double traceFontSize;
+  final TextStyle? traceStyle;
+
+  final TextStyle? timeStyle;
+
   ConsoleConfiguration({
-    double? heightRatio,
-    double? logFontSize,
-    double? errorFontSize,
-    double? traceFontSize,
-  }): heightRatio = heightRatio ?? 0.9,
-      logFontSize = logFontSize ?? 13,
-      errorFontSize = errorFontSize ?? 15,
-      traceFontSize = traceFontSize ?? 10,
-      assert(heightRatio == null || (heightRatio >= 0.4 && heightRatio <= 1),
-        "heightRatio must in [0.4, 1] or null");
+    this.logStyle,
+    this.errorStyle,
+    this.traceStyle,
+    this.timeStyle,
+  });
 }
 
 /// 控制台
 class Console extends StatefulWidget {
-  final Size size;
-
   const Console({
     Key? key,
-    required this.size,
   }) : super(key: key);
 
   @override
@@ -173,10 +164,8 @@ class _ConsoleState extends State<Console> {
   @override
   void initState() {
     super.initState();
-    pos = Offset(
-      20,
-      widget.size.height - 100
-    );
+    final query = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
+    pos = Offset(20, query.size.height - 100);
   }
 
   @override
@@ -225,97 +214,83 @@ class _ConsoleState extends State<Console> {
             ),
           ),
         ),
-        // 蒙层
-        if (showPanel)
-          Positioned(
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  showPanel = false;
-                });
-              },
-              child: const ColoredBox(
-                color: Colors.black38,
-              ),
-            ),
-          ),
         // console面板
         if (showPanel)
-          Positioned(
-            bottom: 0,
-            top: widget.size.height * (1 - ConsoleMgr.config.heightRatio),
-            left: 0,
-            right: 0,
-            child: DefaultTextStyle(
-              style: const TextStyle(
-                fontSize: 26,
-                color: Colors.black,
-              ),
-              child: Material(
-                child: Column(
-                  children: [
-                    _ConsoleHeader(
-                        tabItems: _tabItems,
-                        onTabChange: (index) {
-                          String? condition;
-                          if (_tabItems[index] != "All") {
-                            condition = _tabItems[index];
-                          }
-                          ConsoleMgr.instance.logsFilter(condition);
-                        },
-                        onClose: () {
-                          setState(() {
-                            showPanel = false;
-                          });
-                        }),
-                    const _ConsoleBody(),
-                    SizedBox(
-                      height: 50,
-                      child: ColoredBox(
-                        color: const Color(0xfff6f6f6),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextButton(
-                                onPressed: () {
-                                  ConsoleMgr.instance.clearLog();
-                                },
-                                child: const Text("Clear"),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 40,
-                              child: VerticalDivider(
-                                width: 10,
-                                color: Colors.grey,
-                                indent: 5,
-                                endIndent: 5,
-                              ),
-                            ),
-                            Expanded(
-                              child: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    showPanel = false;
-                                  });
-                                },
-                                child: const Text("Dispose"),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+          Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) => Scaffold(
+                  bottomNavigationBar: _buildFoot(),
+                  body: DefaultTextStyle(
+                    style: const TextStyle(
+                      fontSize: 26,
+                      color: Colors.black,
+                    ),
+                    child: Column(
+                      children: [
+                        _ConsoleHeader(
+                            tabItems: _tabItems,
+                            onTabChange: (index) {
+                              String? condition;
+                              if (_tabItems[index] != "All") {
+                                condition = _tabItems[index];
+                              }
+                              ConsoleMgr.instance.logsFilter(condition);
+                            },
+                            onClose: () {
+                              setState(() {
+                                showPanel = false;
+                              });
+                            }),
+                        const _ConsoleBody(),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              )
+            ],
           ),
       ],
+    );
+  }
+
+  Widget _buildFoot() {
+    return SizedBox(
+      height: 50,
+      child: ColoredBox(
+        color: const Color(0xfff6f6f6),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  ConsoleMgr.instance.clearLog();
+                },
+                child: const Text("Clear"),
+              ),
+            ),
+            const SizedBox(
+              height: 40,
+              child: VerticalDivider(
+                width: 10,
+                color: Colors.grey,
+                indent: 5,
+                endIndent: 5,
+              ),
+            ),
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    showPanel = false;
+                  });
+                },
+                child: const Text("Dispose"),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -331,7 +306,7 @@ class _ConsoleBody extends StatefulWidget {
 class _ConsoleBodyState extends State<_ConsoleBody> {
   late List<VisualOutputEvent> list;
 
-  dynamic lastChange;
+  List<dynamic>? lastChange;
 
   @override
   void initState() {
@@ -349,13 +324,17 @@ class _ConsoleBodyState extends State<_ConsoleBody> {
   onConsoleChange() {
     var instance = ConsoleMgr.instance;
     var list = instance.noCondition ? instance.logs : instance.filterLogs;
-    var tuple = Tuple4(
+    var tuple = <dynamic>[
       list,
       list.length, // 当删除某一项时，只有长度会变
       instance.searchString, // 当搜索结果词变了的时候如果长度一直则不会刷新，所以要加上
       instance.condition, // 当条件改变的时候需要判断
-    );
+    ];
     if (tuple != lastChange) {
+      if (lastChange != null &&
+          lastChange!.asMap().entries.every((e) => tuple[e.key] == e.value)) {
+        return;
+      }
       lastChange = tuple;
       setState(() {
         this.list = list;
@@ -391,17 +370,14 @@ class _LogListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () async {
-        Clipboard.setData(
-          ClipboardData(
-            text: event.log,
-          ),
-        );
-        // showSnack("Copied!");
-      },
       onDoubleTap: () {
         ConsoleMgr.instance.deleteLog(event);
-        // showSnack("Deleted!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Deleted!'),
+            duration: Duration(seconds: 1),
+          ),
+        );
       },
       child: ColoredBox(
         color: ConsoleMgr.levelColors[event.level]!,
@@ -445,30 +421,37 @@ class _LogItemState extends State<_LogItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.event.time != null)
-          Text(
-            widget.event.time!,
-            style: const TextStyle(fontSize: 10),
+        SelectableText.rich(TextSpan(children: [
+          if (widget.event.time != null)
+            TextSpan(
+              text: widget.event.time! + '\n',
+              style: const TextStyle(fontSize: 10).merge(
+                ConsoleMgr.config.timeStyle,
+              ),
+            ),
+          TextSpan(
+            text: widget.event.log + '\n',
+            style: ConsoleMgr.config.logStyle,
           ),
-        Text(widget.event.log, style: TextStyle(
-          fontSize: ConsoleMgr.config.logFontSize,
-        )),
-        if (widget.event.errorName != null)
-          Text(
-            widget.event.errorName!,
-            style: TextStyle(
-                fontSize: ConsoleMgr.config.errorFontSize,
+          if (widget.event.errorName != null)
+            TextSpan(
+              text: widget.event.errorName! + '\n',
+              style: TextStyle(
+                fontSize: 15,
                 color: ConsoleMgr.levelTextColors[widget.event.level]!,
-                height: 2),
-          ),
-        if (widget.event.errorStack != null)
-          Text(
-            widget.event.errorStack!,
-            style: TextStyle(
-                fontSize: ConsoleMgr.config.traceFontSize,
+                height: 2,
+              ).merge(ConsoleMgr.config.errorStyle),
+            ),
+          if (widget.event.errorStack != null)
+            TextSpan(
+              text: widget.event.errorStack!,
+              style: TextStyle(
+                fontSize: 10,
                 color: ConsoleMgr.levelTextColors[widget.event.level]!,
-                height: 2),
-          ),
+                height: 2,
+              ).merge(ConsoleMgr.config.traceStyle),
+            ),
+        ])),
       ],
     );
   }
@@ -490,7 +473,8 @@ class _ConsoleHeader extends StatefulWidget {
   _ConsoleHeaderState createState() => _ConsoleHeaderState();
 }
 
-class _ConsoleHeaderState extends State<_ConsoleHeader> {
+class _ConsoleHeaderState extends State<_ConsoleHeader>
+    with TickerProviderStateMixin {
   late final TabController tabController;
   bool showFilter = false;
   TextEditingController textEditController = TextEditingController();
@@ -498,7 +482,7 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
   void initState() {
     tabController = TabController(
       length: widget.tabItems.length,
-      vsync: ScrollableState(),
+      vsync: this,
     );
     super.initState();
   }
@@ -556,35 +540,27 @@ class _ConsoleHeaderState extends State<_ConsoleHeader> {
         if (showFilter)
           SizedBox(
             height: 50,
-            child: Overlay(
-              initialEntries: [
-                OverlayEntry(builder: (_) {
-                  return ListTile(
-                    leading: IconButton(
-                      onPressed: () {
-                        var val = textEditController.text;
-                        ConsoleMgr.instance
-                            .logsFilter(val == "" ? null : val, true);
-                      },
-                      icon: const Icon(Icons.search),
-                    ),
-                    title: TextField(
-                      controller: textEditController,
-                      onSubmitted: (val) {
-                        ConsoleMgr.instance
-                            .logsFilter(val == "" ? null : val, true);
-                      },
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.cancel),
-                      onPressed: () {
-                        textEditController.clear();
-                        ConsoleMgr.instance.logsFilter(null, true);
-                      },
-                    ),
-                  );
-                })
-              ],
+            child: ListTile(
+              leading: IconButton(
+                onPressed: () {
+                  var val = textEditController.text;
+                  ConsoleMgr.instance.logsFilter(val == "" ? null : val, true);
+                },
+                icon: const Icon(Icons.search),
+              ),
+              title: TextField(
+                controller: textEditController,
+                onSubmitted: (val) {
+                  ConsoleMgr.instance.logsFilter(val == "" ? null : val, true);
+                },
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.backspace),
+                onPressed: () {
+                  textEditController.clear();
+                  ConsoleMgr.instance.logsFilter(null, true);
+                },
+              ),
             ),
           )
       ],
