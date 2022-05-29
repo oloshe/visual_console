@@ -147,7 +147,10 @@ class ConsoleConfiguration {
 class Console extends StatefulWidget {
   const Console({
     Key? key,
+    this.alignment,
   }) : super(key: key);
+
+  final Alignment? alignment;
 
   @override
   _ConsoleState createState() => _ConsoleState();
@@ -165,7 +168,14 @@ class _ConsoleState extends State<Console> {
   void initState() {
     super.initState();
     final query = MediaQueryData.fromWindow(WidgetsBinding.instance!.window);
-    pos = Offset(20, query.size.height - 100);
+    if (widget.alignment != null) {
+      pos = widget.alignment!.alongSize(Size(
+        query.size.width - 100,
+        query.size.height - 40,
+      ));
+    } else {
+      pos = Offset(20, query.size.height - 100);
+    }
   }
 
   @override
@@ -198,19 +208,23 @@ class _ConsoleState extends State<Console> {
                 dragging = true;
               });
             },
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.green),
-              ),
-              onPressed: () {
-                setState(() {
-                  showPanel = true;
-                });
+            child: SizedBox(
+              width: 100,
+              height: 40,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green),
+                ),
+                onPressed: () {
+                  setState(() {
+                    showPanel = true;
+                  });
 
-                /// 每次打开重置一下
-                ConsoleMgr.instance.logsFilter(null);
-              },
-              child: const Text("Console"),
+                  /// 每次打开重置一下
+                  ConsoleMgr.instance.logsFilter(null);
+                },
+                child: const Text("Console"),
+              ),
             ),
           ),
         ),
